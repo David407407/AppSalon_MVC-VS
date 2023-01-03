@@ -1,0 +1,20 @@
+{
+    "name": "darks/app_prueba",
+    "description": "proyecto de prueba con gulp, sass, node js",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Darks\\AppPrueba\\": "src/",
+            "MVC\\" : "./",
+            "Controllers\\" : "./controllers",
+            "Model\\" : "./models"
+        }
+    },
+    "authors": [
+        {
+            "name": "David407407",
+            "email": "darksideinthespace@gmail.com"
+        }
+    ],
+    "require": {}
+}

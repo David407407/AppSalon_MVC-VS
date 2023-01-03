@@ -1,6 +1,6 @@
 <?php
 
-$db = mysqli_connect('localhost', 'root', '', '');
+$db = mysqli_connect('localhost', 'root', 'Root', 'appsalon_mvc'); // Primero el host, luego el usuario, la contraseña  y por último el nombre de la tabla
 
 
 if (!$db) {
