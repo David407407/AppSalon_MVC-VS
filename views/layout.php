@@ -8,9 +8,14 @@
     <link rel="stylesheet" href="build/css/app.css">
 </head>
 <body>
-
-    <h1>Hola Mundo!</h1>
-    <!-- <?php echo $contenido; ?> -->
+ 
+    <!-- Esta es la página principal, lo que hace es traerse del router la dirección de la página junto al método e ir trayendo el contenido del archivo php que definimos -->
+    <div class="contenedor-app">
+        <div class="imagen"></div>
+        <div class="app">
+            <?php echo $contenido; ?>
+        </div>
+    </div>
             
 </body>
 </html>

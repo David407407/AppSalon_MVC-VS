@@ -1,0 +1,26 @@
+@use 'base/mixins' as m;
+@use 'base/variables' as v;
+
+.contenedor-app {
+    @include m.tablet {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        min-height: 100vh;
+    }
+
+    .imagen {
+        height: 20rem;
+        background-image: url(../img/1.jpg); // La mandamos llamar desde la posición del app.scss
+        background-size: cover; // Hace que cubra todo el espacio la imagen
+        background-position: center center; // La coloca exactamente en el medio
+        @include m.tablet {
+            height: auto;
+        }
+    }
+
+    .app {
+        width: 95%;
+        margin: 0 auto;
+        padding: 3rem 0;
+    }
+}
