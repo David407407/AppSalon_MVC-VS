@@ -6,7 +6,7 @@ use Model\Usuario;
 
 class LoginController {
     public static function login(Router $router) {
-        $router->render('auth/login'); // Método render esta creado en el router, toma diversos datos en forma de arreglo, el primer dato es el del archivo que va a renderizar, no hace falta ponerle la extensión y ya esta apuntando a la carpeta de views automaticamente
+        $router->render('auth/login'); // Método render esta creado en el router, toma diversos datos en forma de arreglo, el primer dato es el del archivo que va a renderizar, no hace falta ponerle la extensión y ya esta apuntando a la carpeta de views automaticamente y como segundo dato toma las variables que queremos que estén disponibles dentro del archivo
     }
     public static function logout() {
         echo "Desde Logout";
