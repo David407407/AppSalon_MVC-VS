@@ -26,4 +26,47 @@ class Usuario extends ActiveRecord {
         $this->confirmado = $args['confirmado'] ?? null;
         $this->token = $args['token'] ?? '';
     }
+
+    // Mensajes de validación al crear la cuenta
+    public function validarNuevaCuenta() {
+        if(!$this->nombre) {
+            self::$alertas['error'][] = 'El nombre del cliente es obligatorio';
+        }
+        if(!$this->apellido) {
+            self::$alertas['error'][] = 'El apellido del cliente es obligatorio';
+        }
+        if(!$this->email) {
+            self::$alertas['error'][] = 'El email del cliente es obligatorio';
+        }
+        if(!$this->password) {
+            self::$alertas['error'][] = 'La contraseña del cliente es obligatorio';
+        }
+        if(!$this->telefono) {
+            self::$alertas['error'][] = 'El teléfono del cliente es obligatorio';
+        }
+        if(\strlen($this->password) < 6) {
+            self::$alertas['error'][] = 'La Contraseña debe contener 6 caracteres mínimo';
+        }
+
+        return self::$alertas;
+    }
+
+    // Revisa si el usuario ya existe
+    public function existeUsuario() {
+        $query = " SELECT * FROM " . self::$tabla . " WHERE email = '" . $this->email . "' LIMIT 1"; // Siempre que nos querramos referir a una consulta en la BD crearemos la variable query la cual debe contener la instruccion en formato SQL
+
+        $resultado = self::$db->query($query); // recordemos que db es la BD y el metodo query nos permite hacer consultas en la BD y traernos el resultado si es que encontro algo
+        if($resultado->num_rows) {
+            self::$alertas['error'][] = 'El usuario ya esta registrado';
+        }
+
+        return $resultado;
+    }
+
+    public function hashPassword() {
+        $this->password = password_hash($this->password, PASSWORD_BCRYPT);
+    }
+    public function crearToken() {
+        $this->token = uniqid();
+    }
 }

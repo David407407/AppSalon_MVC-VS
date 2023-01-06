@@ -3,6 +3,7 @@
 namespace Controllers;
 use MVC\Router;
 use Model\Usuario;
+use Classes\Email;
 
 class LoginController {
     public static function login(Router $router) {
@@ -21,12 +22,39 @@ class LoginController {
     }
     public static function crear(Router $router) {
         $usuario = new Usuario;
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+        // Alertas vacias
+        $alertas = [];
+        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $usuario->sincronizar($_POST); // Sincroniza con lo visto escrito en la página
+            $alertas = $usuario->validarNuevaCuenta(); // Checa si los campos no están vacios, si lo están crea un mensaje de error
+
+            // Revisar que alertas este vacío
+            if(empty($alertas)) {
+                // Verificar que el usuario no este registrado
+                $resultado = $usuario->existeUsuario();
+
+                if($resultado->num_rows) {
+                    // Si esta registrado
+                    $alertas = Usuario::getAlertas();
+                } else {
+                    // No esta registrado
+                    //Hashear el password
+                    $usuario->hashPassword();
+                    // Generar un token
+                    $usuario->crearToken();
+                    // Enviar el email
+                    $email = new Email($usuario->nombre, $usuario->email, $usuario->token);
+                    $email->enviarConfirmacion();
+
+                    debuguear($email);
+                }
+            }
         }
 
         $router->render('auth/crear-cuenta', [
-            'usuario' => $usuario
+            'usuario' => $usuario,
+            'alertas' => $alertas
         ]);
     }
 }

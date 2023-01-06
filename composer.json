@@ -7,7 +7,8 @@
             "Darks\\AppPrueba\\": "src/",
             "MVC\\" : "./",
             "Controllers\\" : "./controllers",
-            "Model\\" : "./models"
+            "Model\\" : "./models",
+            "Classes\\" : "./classes"
         }
     },
     "authors": [
@@ -16,5 +17,7 @@
             "email": "darksideinthespace@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "phpmailer/phpmailer": "^6.7"
+    }
 }
