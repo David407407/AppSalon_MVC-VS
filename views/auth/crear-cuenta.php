@@ -3,7 +3,7 @@
 
     <?php include_once __DIR__ . "/../templates/alertas.php" ?>
 
-<form action="/public/crear-cuenta" class="formulario" method="POST">
+<form action="/crear-cuenta" class="formulario" method="POST">
     <div class="campo">
         <label for="nombre">Nombre</label>
         <input 
@@ -63,6 +63,6 @@
 </form> 
 
 <div class="acciones">
-    <a href="/public/">¿Ya tienes una cuenta? Inicia Sesión</a>
-    <a href="/public/olvide">¿Olvidaste tu contraseña?</a>
+    <a href="/">¿Ya tienes una cuenta? Inicia Sesión</a>
+    <a href="/olvide">¿Olvidaste tu contraseña?</a>
 </div>

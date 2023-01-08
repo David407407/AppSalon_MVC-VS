@@ -22,8 +22,8 @@ class Usuario extends ActiveRecord {
         $this->email = $args['email'] ?? '';
         $this->password = $args['password'] ?? '';
         $this->telefono = $args['telefono'] ?? '';
-        $this->admin = $args['admin'] ?? null;
-        $this->confirmado = $args['confirmado'] ?? null;
+        $this->admin = $args['admin'] ?? 0;
+        $this->confirmado = $args['confirmado'] ?? 0;
         $this->token = $args['token'] ?? '';
     }
 
@@ -51,6 +51,29 @@ class Usuario extends ActiveRecord {
         return self::$alertas;
     }
 
+    public function validarCuenta() {
+        if(!$this->email) {
+            self::$alertas['error'][] = 'El email del cliente es obligatorio';
+        }
+        if(!$this->password) {
+            self::$alertas['error'][] = 'La contraseña del cliente es obligatoria';
+        }
+    }
+
+    public function validarEmail() {
+        if(!$this->email) {
+            self::$alertas['error'][] = 'El email del cliente es obligatorio';
+        }
+    }
+    public function validarContraseña() {
+        if(!$this->password) {
+            self::$alertas['error'][] = 'La contraseña del cliente es obligatoria';
+        }
+        if(strlen($this->password) < 6) {
+            self::$alertas['error'][] = 'La Contraseña debe contener 6 caracteres mínimo';
+        }
+    }
+
     // Revisa si el usuario ya existe
     public function existeUsuario() {
         $query = " SELECT * FROM " . self::$tabla . " WHERE email = '" . $this->email . "' LIMIT 1"; // Siempre que nos querramos referir a una consulta en la BD crearemos la variable query la cual debe contener la instruccion en formato SQL
@@ -68,5 +91,13 @@ class Usuario extends ActiveRecord {
     }
     public function crearToken() {
         $this->token = uniqid();
+    }
+    public function comprobarContraseñaAndVerificado($password) {
+        $resultado = password_verify($password, $this->password);
+        if(!$resultado || !$this->confirmado) {
+            self::$alertas['error'][] = 'Tu Contraseña es incorrecta o tu cuenta no ha sido confirmada';
+        } else {
+            return true;
+        }
     }
 }
