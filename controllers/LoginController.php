@@ -50,6 +50,7 @@ class LoginController {
     }
     public static function olvide(Router $router) {
         $alertas = [];
+
         if($_SERVER['REQUEST_METHOD'] === 'POST') {
             $auth = new Usuario($_POST);
             $alertas = $auth->validarEmail();
@@ -57,15 +58,23 @@ class LoginController {
             if(empty($alertas)) {
                 // Buscar cual es el usuario que quiere cambiar la contraseña
                 $usuario = Usuario::where('email', $auth->email);
-                // Crear y enviar el email
-                $email = new Email($usuario->nombre, $usuario->email, $usuario->token);
-                $email->cambiarContraseña();
-                // Decirle al usuario que el email se envio
-                Usuario::setAlerta('exito', 'El email ha sido enviado');
-                // Crear el token
-                $usuario->crearToken();
-                // Actualizar el token
-                $usuario->actualizar();
+
+                if($usuario->confirmado === '1' && $usuario) {
+                    // Si existe y si esta confirmado
+                    // Crear el token
+                    $usuario->crearToken();
+                    // Actualizar el token
+                    $usuario->guardar();
+                    // Crear y enviar el email
+                    $email = new Email($usuario->nombre, $usuario->email, $usuario->token);
+                    $email->cambiarContraseña();
+                    // Decirle al usuario que el email se envio
+                    Usuario::setAlerta('exito', 'El email ha sido enviado');
+                    
+                } else {
+                    Usuario::setAlerta('error', 'El usuario no existe o no esta confirmado');
+                }
+                
             }
         }
 
@@ -76,25 +85,34 @@ class LoginController {
     }
     public static function recuperar(Router $router) {
         $alertas = [];
+        $error = false;
         // Sanitizar el token y obtenerlo
         $token = s($_GET['token']);
         // Traernos el usuario gracias al token
         $usuario = Usuario::where('token', $token);
-        debuguear($usuario);
-
         if(empty($usuario)) {
             // Mostrar mensaje de error
             Usuario::setAlerta('error', 'Token no válido');
+            $error = true;
         } else {
             if($_SERVER['REQUEST_METHOD'] === 'POST') {
-                // Modificar el registro a usuario confirmado
-                $usuario->validarContraseña();
+                // Leer el nuevo password y guardarlo
+                $password = new Usuario($_POST);
+                $alertas = $password->validarContraseña();
+                \debuguear($usuario);
+
+
                 if(empty($alertas)) {
-                    $usuario->token = '';
+                    $usuario->password = null;
+                    $usuario->password = $password->password;
+
                     $usuario->hashPassword();
-                    debuguear($usuario);
-                    // $usuario->actualizar();
-                    Usuario::setAlerta('exito', 'Contraseña Cambiada Correctamente');
+                    $usuario->token = null;
+
+                    $resultado = $usuario->guardar();
+                    if($resultado) {
+                        header('Location: /');
+                    }
                 }
             }
         }
@@ -104,8 +122,9 @@ class LoginController {
         $alertas = Usuario::getAlertas();
         $router->render('auth/recuperar-contraseña', [
             'alertas' => $alertas,
-            'usuario' => $usuario
-        ]);
+            'usuario' => $usuario,
+            'error' => $error
+        ]); 
     }
     public static function crear(Router $router) {
         $usuario = new Usuario;
@@ -160,7 +179,7 @@ class LoginController {
         } else {
             // Modificar el registro a usuario confirmado
             $usuario->confirmado = "1";
-            $usuario->token = '';
+            $usuario->token = null;
             $usuario->guardar();
             Usuario::setAlerta('exito', 'Cuenta Comprobada Correctamente');
         }

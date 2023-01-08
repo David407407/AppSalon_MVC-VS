@@ -24,7 +24,7 @@ class Usuario extends ActiveRecord {
         $this->telefono = $args['telefono'] ?? '';
         $this->admin = $args['admin'] ?? 0;
         $this->confirmado = $args['confirmado'] ?? 0;
-        $this->token = $args['token'] ?? '';
+        $this->token = $args['token'] ?? null;
     }
 
     // Mensajes de validación al crear la cuenta
@@ -64,6 +64,8 @@ class Usuario extends ActiveRecord {
         if(!$this->email) {
             self::$alertas['error'][] = 'El email del cliente es obligatorio';
         }
+
+        return self::$alertas;
     }
     public function validarContraseña() {
         if(!$this->password) {
@@ -72,6 +74,8 @@ class Usuario extends ActiveRecord {
         if(strlen($this->password) < 6) {
             self::$alertas['error'][] = 'La Contraseña debe contener 6 caracteres mínimo';
         }
+
+        return self::$alertas;
     }
 
     // Revisa si el usuario ya existe

@@ -1,8 +1,11 @@
 <h1 class='nombre-pagina' >Cambia tu Contraseña</h1>
+<p class="descripcion-pagina" >Introduce tu nueva contraseña a continuación:</p>
 
 <?php include_once __DIR__ . '/../templates/alertas.php'; ?>
 
-<form action="/recuperar" method="POST" class="formulario">
+<?php if($error) return;?>
+
+<form method="POST" class="formulario">
 
     <div class="campo">
         <label for="password">Contraseña</label>
@@ -10,7 +13,7 @@
             type="password"
             id="password"
             name="password"
-            placeholder="Tu Contraseña"
+            placeholder="Tu Nueva Contraseña"
         />
     </div>
 
@@ -19,4 +22,5 @@
 
 <div class="acciones">
     <a href="/">¿Ya tienes una cuenta? Inicia Sesión</a>
+    <a href="/crear-cuenta">¿Aún no tienes una cuenta? Crea una</a>
 </div>
