@@ -2,6 +2,8 @@
 
 $db = mysqli_connect('localhost', 'root', 'Root', 'appsalon_mvc'); // Primero el host, luego el usuario, la contraseña  y por último el nombre de la tabla
 
+$db->set_charset("utf8");
+mysqli_set_charset($db, 'utf8mb4');
 
 if (!$db) {
     echo "Error: No se pudo conectar a MySQL.";
