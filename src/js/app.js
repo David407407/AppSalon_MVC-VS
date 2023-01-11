@@ -3,6 +3,13 @@ let paso = 1;
 const pasoInicial = 1;
 const pasoFinal = 3;
 
+const cita = {
+    nombre: '',
+    fecha: '',
+    hora: '',
+    servicios: []
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     iniciarApp();
 });
@@ -15,6 +22,12 @@ function iniciarApp() { // Esta funcion se manda a llamar una vez, solo cuando s
     paginaAnterior();
 
     consultarAPI(); // Consulta la API en el backend de PHP
+
+    nombreCliente(); // Añade le nombre del cliente a la cita
+    seleccionarFecha(); // Añade la fecha de la cita a la cita
+    seleccionarHora(); // Añade la hora de la cita a la cita
+
+    mostrarResumen(); // Muestra el resumen de la cita
 }
 
 function mostrarSeccion() {
@@ -119,6 +132,9 @@ function mostrarServicios (servicios) {
         const servicioDiv = document.createElement('DIV');
         servicioDiv.classList.add('servicio');
         servicioDiv.dataset.idServicio = id;
+        servicioDiv.onclick = () => { // Usamos este callback para que la funcion solo se llame cuando demos click, de otro modo se llamaría la función cuando se mande a llamar la otra
+            seleccionarServicio(servicio);
+        };
 
         // Agregamos al div los elementos creados
         servicioDiv.appendChild(nombreServicio);
@@ -127,4 +143,74 @@ function mostrarServicios (servicios) {
         // Agregamos el div creado con js al div donde queremos que se muestren los servicios
         document.querySelector('#servicios').appendChild(servicioDiv);
     });
+}
+
+function seleccionarServicio(servicio) {
+    const { id } = servicio;
+    const { servicios } = cita; // Obtenemos la propiedad de servicios del objeto de cita
+
+    // Identificar el elemento al que se le da click, ya que ya le estamos pasando el servicio y su id al dar click
+    const divServicio = document.querySelector(`[data-id-servicio="${id}"]`); 
+    // Comprobar si el servicio fue comprobado
+    if( servicios.some( agregado => agregado.id === id ) ) { // Este metodo nos devuelve true(si es igual al elemento actual) o false(si es diferente al elemento actual), agregado se refiere al elemento actual que estamos seleccionando, y le decimos que si el id del actual elemento es igual a algun otro id del arreglo nos devuelva true
+        // Eliminarlo
+        cita.servicios = servicios.filter( agregado => agregado.id !== id ); // Este metodo busca el servicio que sea igual al actual y lo borra, este metodo funciona al reves pues le decimos que mantenga todo elemento que no sea igual al id actual
+        divServicio.classList.remove('seleccionado'); // Le removemos la clase de seleccionado al id actual
+    } else {
+        // Agregarlos
+        cita.servicios = [...servicios, servicio]; // A la propiedad le agregamos un arreglo que va a contener la copia del primer arreglo más el servicio que le estamos pasando, es importante que sea una copia ya que primero agrega el servicio al arreglo copia y luego le pasa el nuevo arreglo
+        divServicio.classList.add('seleccionado');
+    }
+
+    console.log(cita);
+}
+
+function nombreCliente() {
+    const nombre = document.querySelector('#nombre').value; // Como ya esta asignado el nombre solo tenemos que obtener el dato del input mediante value
+    cita.nombre = nombre; // Le asignamos el nombre a la cita
+}
+
+function seleccionarFecha() {
+    const inputFecha = document.querySelector('#fecha');
+    inputFecha.addEventListener('input', (e) => { // Se dispara la funcion cuando el usuario selecciona un dato
+        const dia = new Date(e.target.value).getUTCDay(); // Obtenemos la fecha en cuestion de los dias de la semana
+        if( [6, 0].includes(dia) ) { // 0 y 6 es domingo y sabado por lo que si nuestra fecha incluye alguno de estos dos se dispara el if
+            e.target.value = ''; // Elimina el valor de la fecha
+            mostrarAlerta('Fines de semana no Permitidos', 'error'); // Muestra la alerta
+        } else {
+            cita.fecha = e.target.value; // Como no son los dias que prohibimos podemos agregar la fecha con exito
+        }
+    });
+}
+
+function seleccionarHora() {
+    const inputHora = document.querySelector('#hora');
+    inputHora.addEventListener('input', (e) => {
+        const horaCita = e.target.value;
+        const hora = horaCita.split(":")[0];
+        if(hora < 10 || hora > 18) {
+            e.target.value = ''; // Elimina el valor de la fecha
+            mostrarAlerta('Hora no Válida', 'error'); // Muestra la alerta
+        } else {
+            cita.hora = e.target.value;
+        }
+
+    });
+}
+
+function mostrarAlerta(mensaje, tipo) {
+    // Previene que se genere más de una alerta
+    const alertaPrevia = document.querySelector('.alerta');
+    if(alertaPrevia) return;
+    // Crea la alerta
+    const alerta = document.createElement('DIV'); 
+    alerta.textContent = mensaje; // Le incluimos el mensaje de la alerta
+    alerta.classList.add('alerta'); // Le agregamos la clase
+    alerta.classList.add(tipo); // Le agregamos el tipo
+    const formulario = document.querySelector('.formulario'); // Este es el elemento de referencia donde queremos insertar la alerta
+    formulario.appendChild(alerta); // Insertamos la alerta
+
+    setTimeout(() => { // Le decimos que elimine la alerta despues de cierto tiempo
+        alerta.remove();
+    }, 3000);
 }
