@@ -1,3 +1,4 @@
+
 // Public es la versión compilada, en src escribiremos el código
 let paso = 1;
 const pasoInicial = 1;
@@ -74,6 +75,8 @@ function botonesPaginador() {
     } else if(paso === 3) {
         paginaAnterior.classList.remove('ocultar');
         paginaSiguiente.classList.add('ocultar');
+
+        mostrarResumen();
     } else {
         paginaAnterior.classList.remove('ocultar');
         paginaSiguiente.classList.remove('ocultar');
@@ -176,7 +179,7 @@ function seleccionarFecha() {
         const dia = new Date(e.target.value).getUTCDay(); // Obtenemos la fecha en cuestion de los dias de la semana
         if( [6, 0].includes(dia) ) { // 0 y 6 es domingo y sabado por lo que si nuestra fecha incluye alguno de estos dos se dispara el if
             e.target.value = ''; // Elimina el valor de la fecha
-            mostrarAlerta('Fines de semana no Permitidos', 'error'); // Muestra la alerta
+            mostrarAlerta('Fines de semana no Permitidos', 'error', '.formulario'); // Muestra la alerta
         } else {
             cita.fecha = e.target.value; // Como no son los dias que prohibimos podemos agregar la fecha con exito
         }
@@ -190,7 +193,7 @@ function seleccionarHora() {
         const hora = horaCita.split(":")[0];
         if(hora < 10 || hora > 18) {
             e.target.value = ''; // Elimina el valor de la fecha
-            mostrarAlerta('Hora no Válida', 'error'); // Muestra la alerta
+            mostrarAlerta('Hora no Válida', 'error', '.formulario'); // Muestra la alerta
         } else {
             cita.hora = e.target.value;
         }
@@ -198,19 +201,114 @@ function seleccionarHora() {
     });
 }
 
-function mostrarAlerta(mensaje, tipo) {
+function mostrarAlerta(mensaje, tipo, referencia, desaparece = true) {
     // Previene que se genere más de una alerta
     const alertaPrevia = document.querySelector('.alerta');
-    if(alertaPrevia) return;
+    if(alertaPrevia) { // Si existen alertas previas las elimina para que se puedan crear nuevas alertas
+        alertaPrevia.remove();
+    }
     // Crea la alerta
     const alerta = document.createElement('DIV'); 
     alerta.textContent = mensaje; // Le incluimos el mensaje de la alerta
     alerta.classList.add('alerta'); // Le agregamos la clase
     alerta.classList.add(tipo); // Le agregamos el tipo
-    const formulario = document.querySelector('.formulario'); // Este es el elemento de referencia donde queremos insertar la alerta
-    formulario.appendChild(alerta); // Insertamos la alerta
+    const ubicacion = document.querySelector(referencia); // Este es el elemento de referencia donde queremos insertar la alerta
+    ubicacion.appendChild(alerta); // Insertamos la alerta
 
-    setTimeout(() => { // Le decimos que elimine la alerta despues de cierto tiempo
-        alerta.remove();
-    }, 3000);
+    if(desaparece) {
+        setTimeout(() => { // Le decimos que elimine la alerta despues de cierto tiempo
+            alerta.remove();
+        }, 3000);
+    }
+}
+
+function mostrarResumen() {
+    const resumen = document.querySelector('.contenido-resumen');
+
+    // Limpiar el contenido de resumen
+    while(resumen.firstChild) {
+        resumen.removeChild(resumen.firstChild);
+    }
+
+    if( Object.values(cita).includes('') || cita.servicios.length === 0) { // Object.values accede a los valores del objeto y te los trae en forma de arreglo, con el includes le decimos que si existe dicho elemento en el arreglo entoces devuelva true sino false
+        mostrarAlerta( 'Faltan agregar datos a su cita', 'error', '.contenido-resumen', false);
+        return;
+    } 
+
+    // Formatear el div de resumen
+    const { nombre, fecha, hora, servicios } = cita;
+
+    // Encabezado de la sección
+    const headingResumen = document.createElement('H3');
+    headingResumen.textContent = 'Resumen de Servicios';
+    resumen.appendChild(headingResumen);
+
+    servicios.forEach(servicio => {
+        const { id, nombre, precio } = servicio; // Destructuring sirve para obtener la informacion de las propiedades de los objetos que le estamos pasando
+        const contendorServicio = document.createElement('DIV');
+        contendorServicio.classList.add('contenedor-servicio');
+
+        const textoServicio = document.createElement('P');
+        textoServicio.textContent = nombre;
+
+        const precioServicio = document.createElement('P');
+        precioServicio.innerHTML = `<span>Precio:</span> $${precio}`; // Inner sirve para crear HTML en JS ya que de otra forma lo lee como texto plano
+
+        contendorServicio.appendChild(textoServicio);
+        contendorServicio.appendChild(precioServicio);
+
+        resumen.appendChild(contendorServicio);
+    });
+
+    // Encabezado de la sección
+    const headingCita = document.createElement('H3');
+    headingCita.textContent = 'Resumen de la Cita';
+    resumen.appendChild(headingCita);
+
+    const nombreCliente = document.createElement('P');
+    nombreCliente.innerHTML = `<span>Nombre:</span> ${nombre}`;
+
+    // Creamos el objeto de fecha usando la fecha que ya tenemos, el dia le agregamos un dos ya que por cada vez que instanseemos Date se atrasa un día 
+    const fechaObj = new Date(fecha);
+    const mes = fechaObj.getMonth();
+    const dia = fechaObj.getDate() + 2;
+    const year = fechaObj.getFullYear();
+
+    // Creamos el objeto en UTC para que lo acepte el metodo de localDateString
+    const fechaUTC = new Date( Date.UTC(year, mes, dia) );
+
+    // Formatear la fecha en español con es-MX, luego le pasamos las opciones para que la variable se muestre en la forma que queremos, en este caso long significa que el valor debe ser en string y no en número y numeric si es en número
+    const opciones = {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
+    const fechaFormateada = fechaUTC.toLocaleDateString('es-MX', opciones);
+
+    const fechaCita = document.createElement('P');
+    fechaCita.innerHTML = `<span>Fecha:</span> ${fechaFormateada}`;
+
+    const horaCita = document.createElement('P');
+    horaCita.innerHTML = `<span>Hora:</span> ${hora} Horas`;
+
+    const botonReservar = document.createElement('BUTTON');
+    botonReservar.classList.add('boton');
+    botonReservar.textContent = 'Reservar Cita';
+    botonReservar.onclick = reservarCita;
+
+    resumen.appendChild(nombreCliente);
+    resumen.appendChild(fechaCita);
+    resumen.appendChild(horaCita);
+
+    resumen.appendChild(botonReservar);
+}
+
+async function reservarCita() {
+    const datos = new FormData();
+    datos.append();
+
+    // Peticion hacia la api
+    const url = 'http://localhost:8888/api/citas';
+    const respuesta = await fetch(url, {
+        method: 'POST'
+    });
+
+    console.log(respuesta);
+    // console.log([...datos]); De esta forma es posible ver los datos que se estan enviando 
 }
