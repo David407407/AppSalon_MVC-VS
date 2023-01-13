@@ -1,10 +1,10 @@
-
 // Public es la versión compilada, en src escribiremos el código
 let paso = 1;
 const pasoInicial = 1;
 const pasoFinal = 3;
 
 const cita = {
+    id: '',
     nombre: '',
     fecha: '',
     hora: '',
@@ -25,6 +25,7 @@ function iniciarApp() { // Esta funcion se manda a llamar una vez, solo cuando s
     consultarAPI(); // Consulta la API en el backend de PHP
 
     nombreCliente(); // Añade le nombre del cliente a la cita
+    idCliente(); // Añade el id del cliente a la cita
     seleccionarFecha(); // Añade la fecha de la cita a la cita
     seleccionarHora(); // Añade la hora de la cita a la cita
 
@@ -164,13 +165,16 @@ function seleccionarServicio(servicio) {
         cita.servicios = [...servicios, servicio]; // A la propiedad le agregamos un arreglo que va a contener la copia del primer arreglo más el servicio que le estamos pasando, es importante que sea una copia ya que primero agrega el servicio al arreglo copia y luego le pasa el nuevo arreglo
         divServicio.classList.add('seleccionado');
     }
-
-    console.log(cita);
 }
 
 function nombreCliente() {
     const nombre = document.querySelector('#nombre').value; // Como ya esta asignado el nombre solo tenemos que obtener el dato del input mediante value
     cita.nombre = nombre; // Le asignamos el nombre a la cita
+}
+
+function idCliente() {
+    const id = document.querySelector('#id').value; // Como ya esta asignado el nombre solo tenemos que obtener el dato del input mediante value
+    cita.id = id; // Le asignamos el id a la cita
 }
 
 function seleccionarFecha() {
@@ -300,15 +304,44 @@ function mostrarResumen() {
 }
 
 async function reservarCita() {
-    const datos = new FormData();
-    datos.append();
+    const { id, fecha, hora, servicios } = cita; // Creamos las variables con la informacion del objeto
 
-    // Peticion hacia la api
-    const url = 'http://localhost:8888/api/citas';
-    const respuesta = await fetch(url, {
-        method: 'POST'
-    });
+    const idServicios = servicios.map( servicio => servicio.id ); // .map nos trae todas las variables que estemos buscando de un arreglo, es decir solo nos trae lo que queremos que nos triaga
 
-    console.log(respuesta);
+    const datos = new FormData(); // FormData es el objeto que tenemos que pasarle a fetch para que sea recibido por PHP
+    datos.append('usuarioId', id); // Primero va la forma en que accedemos a el y segundo su valor
+    datos.append('fecha', fecha);
+    datos.append('hora', hora);
+    datos.append('servicios', idServicios);
+
+    try {
+        // Peticion hacia la api
+        const url = 'http://localhost:8888/api/citas';
+        const respuesta = await fetch(url, { // Primero la url, segundo el metodo solo se pone cuando hacemos una peticion POST y tercero los datos que le estamos pasando a POST
+            method: 'POST',
+            body: datos
+        });
+
+        const resultado = await respuesta.json(); // Mandamos el resultado en json
+
+        if(resultado.resultado) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Cita Creada',
+                text: 'Tu Cita fue Creada Correctamente!',
+                button: 'Ok'
+            }).then( () => {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un Error al Guardar la Cita',
+        });
+    }
     // console.log([...datos]); De esta forma es posible ver los datos que se estan enviando 
 }

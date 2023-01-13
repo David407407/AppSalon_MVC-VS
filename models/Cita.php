@@ -1,9 +1,9 @@
 <?php
 namespace Model;
 
-class Usuario extends ActiveRecord {
+class Cita extends ActiveRecord {
     // BD
-    protected static $tabla = 'cita';
+    protected static $tabla = 'citas';
     protected static $columnasDB = ['id', 'usuarioId', 'hora', 'fecha'];
     public $id;
     public $usuarioId;
