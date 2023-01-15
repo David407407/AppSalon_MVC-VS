@@ -16,5 +16,13 @@
             font-weight: v.$regular;
             color: v.$blanco;
         }
+
+        .boton {
+            background-color: v.$rojo;
+
+            &:hover {
+                background-color: darken(v.$rojo, 15%);
+            }
+        }
     }
 }

@@ -22,6 +22,19 @@
         width: 95%;
         margin: 0 auto;
         padding: 3rem 0;
+        @include m.tablet {
+            overflow: auto;
+        }
+        /*Webkit(Chrome, Android browser, Safari, Edge...)*/
+        &::-webkit-scrollbar { // Esto nos permite seleccionar la barra de scroll como parametro y al aplicarle un display none ya no se ve pero sigue funcionando
+            display: none;
+        }
+        // &:hover::-webkit-scrollbar {
+        //     display: initial;
+        // }
+        // &::-webkit-scrollbar-thumb {
+        //     background-color: v.$negro;
+        // }
     }
 }
 
