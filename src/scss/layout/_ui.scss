@@ -52,3 +52,24 @@
         margin: 0;
     }
 }
+
+.barra-servicios {
+    margin-bottom: v.$separacion;
+
+    @include m.tablet {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .boton {
+        margin: 0 0 1rem 0;
+    }
+
+    .boton-crear {
+        background-color: v.$verde;
+
+        &:hover {
+            background-color: darken( v.$verde, 10%);
+        }
+    }
+}
